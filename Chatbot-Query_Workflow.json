@@ -1,0 +1,599 @@
+{
+  "name": "Query Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "ULB Feedback",
+        "formDescription": "Provide us with all the feedback and complaints",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Division",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Bhopal"
+                  },
+                  {
+                    "option": "Indore"
+                  },
+                  {
+                    "option": "Gwalior"
+                  },
+                  {
+                    "option": "Ujjain"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Feedback",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Complaint",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -496,
+        -48
+      ],
+      "id": "77b01fcf-d7b5-416a-adcd-0745985d6deb",
+      "name": "On form submission",
+      "webhookId": "024f9edb-ed00-44cb-b40d-bbf2331a1049"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5f4ef66c-1938-48e2-a005-06f32b5f1640",
+              "leftValue": "={{ $json.Feedback }}",
+              "rightValue": "Indore",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "a4af9b86-ea33-4ae5-bb26-dab7665c5274",
+      "name": "Job Description?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ee69f29-7c23-4e6d-af4c-dadcf00c406e",
+              "name": "IsTrusted",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        48
+      ],
+      "id": "53fb4147-9e13-4468-ac7c-c9a64898e53a",
+      "name": "IsTrusted : False"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ee69f29-7c23-4e6d-af4c-dadcf00c406e",
+              "name": "IsTrusted",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -128
+      ],
+      "id": "1617ce88-a904-448f-b9df-5ffe2aa887fb",
+      "name": "IsTrusted : True"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "3b1a5610-20c2-4087-a077-eb68276b29e8",
+      "name": "Reference"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        160
+      ],
+      "id": "fac48697-7f30-4f07-b3dc-3ac7e06e868d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KDzAYu00IyKxjCbQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "Chatbot",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Master"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        -48
+      ],
+      "id": "b3ccb767-71f4-42ac-9e76-b00473987026",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uvxyqrzk4eQbVtaz",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "0VmepVw5X0rHH4vJ",
+          "mode": "list",
+          "cachedResultName": "Feedback/Complaint",
+          "cachedResultUrl": "/projects/FdFebP44nVD2mpfi/datatables/0VmepVw5X0rHH4vJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Division": "={{ $('Reference').item.json.Division }}",
+            "Name": "={{ $('Reference').item.json.Name }}",
+            "Feedback": "={{ $('Reference').item.json.Feedback }}",
+            "Complaint": "={{ $('Reference').item.json.Complaint }}",
+            "IsTrusted": "={{ $('Reference').item.json.IsTrusted }}",
+            "Tags": "={{ $('Add Tags').item.json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Division",
+              "displayName": "Division",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Feedback",
+              "displayName": "Feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Complaint",
+              "displayName": "Complaint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IsTrusted",
+              "displayName": "IsTrusted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        -48
+      ],
+      "id": "3cb30a42-a6fd-4379-98b7-5b9811f7542e",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following questions and output relevant tags\n\nDivision : {{ $json.Division }}\nFeedback : {{ $json.Feedback }}\nComlaints : {{ $json.Complaint }}\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a content tagging expert. Your task is to analyze Division, feedback and Complaint and generate relevant tags that categorize the content based on topic, key concept, technical terms. always provide 3-4 tags. Keep tags short and individual.\n\nExample Output:\npartner, partnership, agency, external contractors, lead referral\n\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        384,
+        -48
+      ],
+      "id": "3e280d86-9b6a-427a-8e3f-5ad2a3a1a40c",
+      "name": "Add Tags"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Job Description?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Description?": {
+      "main": [
+        [
+          {
+            "node": "IsTrusted : True",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IsTrusted : False",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsTrusted : True": {
+      "main": [
+        [
+          {
+            "node": "Reference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsTrusted : False": {
+      "main": [
+        [
+          {
+            "node": "Reference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reference": {
+      "main": [
+        [
+          {
+            "node": "Add Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Add Tags",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tags": {
+      "main": [
+        [
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Division": "Indore",
+          "Name": "YashKoshe",
+          "Feedback": "",
+          "Complaint": "MRF not functioning",
+          "submittedAt": "2026-02-22T19:47:03.007+05:30",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create spreadsheet": [
+      {
+        "json": {
+          "spreadsheetId": "1LZFBmhDPf2RiyKAEvEymmrRrdirTVCqkiMU6fObqVfE",
+          "properties": {
+            "title": "Chatbot",
+            "locale": "en_US",
+            "autoRecalc": "ON_CHANGE",
+            "timeZone": "Etc/GMT",
+            "defaultFormat": {
+              "backgroundColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              },
+              "padding": {
+                "top": 2,
+                "right": 3,
+                "bottom": 2,
+                "left": 3
+              },
+              "verticalAlignment": "BOTTOM",
+              "wrapStrategy": "OVERFLOW_CELL",
+              "textFormat": {
+                "foregroundColor": {},
+                "fontFamily": "arial,sans,sans-serif",
+                "fontSize": 10,
+                "bold": false,
+                "italic": false,
+                "strikethrough": false,
+                "underline": false,
+                "foregroundColorStyle": {
+                  "rgbColor": {}
+                }
+              },
+              "backgroundColorStyle": {
+                "rgbColor": {
+                  "red": 1,
+                  "green": 1,
+                  "blue": 1
+                }
+              }
+            },
+            "spreadsheetTheme": {
+              "primaryFontFamily": "Arial",
+              "themeColors": [
+                {
+                  "colorType": "TEXT",
+                  "color": {
+                    "rgbColor": {}
+                  }
+                },
+                {
+                  "colorType": "BACKGROUND",
+                  "color": {
+                    "rgbColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT1",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.25882354,
+                      "green": 0.52156866,
+                      "blue": 0.95686275
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT2",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.91764706,
+                      "green": 0.2627451,
+                      "blue": 0.20784314
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT3",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.9843137,
+                      "green": 0.7372549,
+                      "blue": 0.015686275
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT4",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.20392157,
+                      "green": 0.65882355,
+                      "blue": 0.3254902
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT5",
+                  "color": {
+                    "rgbColor": {
+                      "red": 1,
+                      "green": 0.42745098,
+                      "blue": 0.003921569
+                    }
+                  }
+                },
+                {
+                  "colorType": "ACCENT6",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.27450982,
+                      "green": 0.7411765,
+                      "blue": 0.7764706
+                    }
+                  }
+                },
+                {
+                  "colorType": "LINK",
+                  "color": {
+                    "rgbColor": {
+                      "red": 0.06666667,
+                      "green": 0.33333334,
+                      "blue": 0.8
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "sheets": [
+            {
+              "properties": {
+                "sheetId": 1820866902,
+                "title": "Master",
+                "index": 0,
+                "sheetType": "GRID",
+                "gridProperties": {
+                  "rowCount": 1000,
+                  "columnCount": 26
+                }
+              }
+            }
+          ],
+          "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1LZFBmhDPf2RiyKAEvEymmrRrdirTVCqkiMU6fObqVfE/edit"
+        }
+      }
+    ]
+  },
+  "triggerCount": 1,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
